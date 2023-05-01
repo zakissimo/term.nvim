@@ -6,7 +6,6 @@ M._init = function ()
     vim.cmd("13sp")
     vim.cmd("buffer" .. M.buf)
     _ = vim.fn.termopen("zsh")
-    vim.cmd("startinsert")
     return M.path, M.buf
 end
 
@@ -22,7 +21,6 @@ M.toggle = function ()
             else
                 vim.cmd("13sp")
                 vim.cmd("buffer" .. M.term_bufnr)
-                vim.cmd("startinsert")
             end
         end
     else
