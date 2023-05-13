@@ -1,15 +1,5 @@
 local M = {}
 
-local TermAugroup = vim.api.nvim_create_augroup("TermAugroup", { clear = true })
-
-vim.api.nvim_create_autocmd({ "BufLeave" }, {
-    group = TermAugroup,
-    pattern = "Term",
-    callback = function()
-        M.term_bufnr = 0
-    end,
-})
-
 M.default = {
     spawn = true,
     type = "13sp"
@@ -30,28 +20,32 @@ M._init = function ()
     end
     vim.cmd("buffer" .. M.bufnr)
     _ = vim.fn.termopen("zsh")
-    return M.path, M.bufnr
 end
 
 M.toggle = function ()
-    M.path = vim.fn.expand("%:p:h")
-    if vim.fn.bufexists(M.term_bufnr) ~= 0 then
-        if vim.fn.bufwinnr(M.term_bufnr) > -1 then
-            -- vim.api.nvim_win_close(vim.fn.win_getid(vim.fn.bufwinnr(M.term_bufnr)), true)
-            vim.cmd("bd!")
+    local path = vim.fn.expand("%:p:h")
+    if vim.fn.bufexists(M.bufnr) ~= 0 then
+        if vim.fn.bufwinnr(M.bufnr) > -1 then
+            if M.default.spawn then
+                local winid = vim.fn.win_getid(vim.fn.bufwinnr(M.bufnr))
+                vim.api.nvim_win_close(winid, true)
+            else
+                local key = vim.api.nvim_replace_termcodes("<C-6>", true, false, true)
+                vim.api.nvim_feedkeys(key, 'n', false)
+            end
         else
-            if M.term_path ~= M.path then
-                vim.cmd("bprev")
-                M.term_path, M.term_bufnr = M._init()
+            if path ~= M.path then
+                vim.cmd("bd! " .. M.bufnr)
+                M._init()
             else
                 if M.default.spawn then
                     vim.cmd(M.default.type)
                 end
-                vim.cmd("buffer" .. M.term_bufnr)
+                vim.cmd("buffer" .. M.bufnr)
             end
         end
     else
-        M.term_path, M.term_bufnr = M._init()
+        M._init()
     end
 end
 
